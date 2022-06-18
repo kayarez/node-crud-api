@@ -10,6 +10,7 @@ import * as messages from "./enum/enum";
 dotenv.config({path: './config.env'});
 
 let getHandler = async (req: IncomingMessage, res: ServerResponse) => {
+  try{
     let pathArray = req.url?.split('/');
     if (pathArray) {
         switch ("/" + pathArray[1] + "/" + pathArray[2]) {
@@ -20,10 +21,23 @@ let getHandler = async (req: IncomingMessage, res: ServerResponse) => {
                 httpHelper.writeErrorEnd(res, 404, messages.Errors.INVALID_URL);
                 break;
         }
+    }}
+
+    catch(error)
+    {
+      res.writeHead(500, { "Content-Type": "application/json" });
+         res.end(
+           JSON.stringify({
+             success: false,
+             error: error,
+           })
+         );
     }
+
 };
 
 let postHandler = async (req: IncomingMessage, res: ServerResponse) => {
+  try{
     switch (url.parse(<string>req.url).pathname) {
         case '/api/users/':
             await userContoller.addUser(req, res);
@@ -31,10 +45,22 @@ let postHandler = async (req: IncomingMessage, res: ServerResponse) => {
         default:
             httpHelper.writeErrorEnd(res, 404, messages.Errors.INVALID_URL);
             break;
+    }}
+
+    catch(error)
+    {
+      res.writeHead(500, { "Content-Type": "application/json" });
+         res.end(
+           JSON.stringify({
+             success: false,
+             error: error,
+           })
+         );
     }
 };
 
 let putHandler = async (req: IncomingMessage, res: ServerResponse) => {
+  try{
     let pathArray = req.url?.split('/');
     if (pathArray) {
         switch ("/" + pathArray[1] + "/" + pathArray[2]) {
@@ -46,9 +72,24 @@ let putHandler = async (req: IncomingMessage, res: ServerResponse) => {
                 break;
         }
     }
+  }
+
+  catch(error)
+  {
+    res.writeHead(500, { "Content-Type": "application/json" });
+       res.end(
+         JSON.stringify({
+           success: false,
+           error: error,
+         })
+       );
+  }
+    
 };
 
 let deleteHandler = async (req: IncomingMessage, res: ServerResponse) => {
+
+  try{
   let pathArray = req.url?.split('/');
   if (pathArray) {
       switch ("/" + pathArray[1] + "/" + pathArray[2]) {
@@ -60,6 +101,19 @@ let deleteHandler = async (req: IncomingMessage, res: ServerResponse) => {
               break;
       }
   }
+
+}
+
+catch(error)
+{
+  res.writeHead(500, { "Content-Type": "application/json" });
+     res.end(
+       JSON.stringify({
+         success: false,
+         error: error,
+       })
+     );
+}
 };
 
 let httpHandler = async (req: IncomingMessage, res: ServerResponse) => {

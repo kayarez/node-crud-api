@@ -1,14 +1,7 @@
 import {IUser} from "../model/user";
 import * as uuid from "uuid"
 
-const users: IUser[] = [
-    {
-        id: 'e1bd85f6-94f3-424d-a734-b3a1bd76d83c',
-        username: 'Boot',
-        age: 12,
-        hobbies: ['cooking']
-    }
-];
+const users: IUser[] = [];
 
 export const getAllUsers = async (): Promise<IUser[]> => Object.values(users);
 

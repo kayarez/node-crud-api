@@ -49,7 +49,7 @@ export const addUser = async (req: IncomingMessage, res: ServerResponse) => {
             }
 
             const newUser: IUser = await userService.addUser(user);
-            httpHelper.writeSuccessEnd(res, 200, newUser);
+            httpHelper.writeSuccessEnd(res, 201, newUser);
         } else {
             httpHelper.writeErrorEnd(res, 400, messages.Errors.BODY_NOT_FOUND)
         }
