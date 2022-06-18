@@ -1,66 +1,90 @@
 import * as http from "http"
 import * as dotenv from "dotenv"
 import * as url from 'url';
-import * as userContoller from "./controller/userController";
-import {OutgoingMessage} from "http";
 import {IncomingMessage, ServerResponse} from "node:http";
+
+import * as userContoller from "./controller/userController";
+import * as httpHelper from "./util/httpHelper";
+import * as messages from "./enum/enum";
 
 dotenv.config({path: './config.env'});
 
-
-let GET_handler = async (req: IncomingMessage, res: ServerResponse) => {
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    switch (url.parse(<string>req.url).pathname) {
-        case '/api/users/':
-            await userContoller.getUsers(req, res);
-            break;
-        default:
-            write_error_400(res, 'Invalid URL');
-            break;
+let getHandler = async (req: IncomingMessage, res: ServerResponse) => {
+    let pathArray = req.url?.split('/');
+    if (pathArray) {
+        switch ("/" + pathArray[1] + "/" + pathArray[2]) {
+            case '/api/users':
+                pathArray[3] ? await userContoller.getUser(req, res) : await userContoller.getUsers(req, res);
+                break;
+            default:
+                httpHelper.writeErrorEnd(res, 404, messages.Errors.INVALID_URL);
+                break;
+        }
     }
 };
 
-let POST_handler = async (req: IncomingMessage, res: ServerResponse) => {
-    res.writeHead(200, {'Content-Type': 'application/json'});
+let postHandler = async (req: IncomingMessage, res: ServerResponse) => {
     switch (url.parse(<string>req.url).pathname) {
         case '/api/users/':
             await userContoller.addUser(req, res);
             break;
         default:
-            write_error_400(res, 'Invalid URL');
+            httpHelper.writeErrorEnd(res, 404, messages.Errors.INVALID_URL);
             break;
     }
 };
 
-let http_handler = async (req: IncomingMessage, res: ServerResponse) => {
-    console.log(req.method);
+let putHandler = async (req: IncomingMessage, res: ServerResponse) => {
+    let pathArray = req.url?.split('/');
+    if (pathArray) {
+        switch ("/" + pathArray[1] + "/" + pathArray[2]) {
+            case '/api/users':
+                await userContoller.updateUser(req, res);
+                break;
+            default:
+                httpHelper.writeErrorEnd(res, 404, messages.Errors.INVALID_URL);
+                break;
+        }
+    }
+};
+
+let deleteHandler = async (req: IncomingMessage, res: ServerResponse) => {
+  let pathArray = req.url?.split('/');
+  if (pathArray) {
+      switch ("/" + pathArray[1] + "/" + pathArray[2]) {
+          case '/api/users':
+              await userContoller.deleteUser(req, res);
+              break;
+          default:
+              httpHelper.writeErrorEnd(res, 404, messages.Errors.INVALID_URL);
+              break;
+      }
+  }
+};
+
+let httpHandler = async (req: IncomingMessage, res: ServerResponse) => {
     switch (req.method) {
         case 'GET':
-            await GET_handler(req, res);
+            await getHandler(req, res);
             break;
         case 'POST':
-            await POST_handler(req, res);
+            await postHandler(req, res);
             break;
-        // case 'PUT':
-        //     PUT_handler(req, res);
-        //     break;
-        // case 'DELETE':
-        //     DELETE_handler(req, res);
-        //     break;
+        case 'PUT':
+            await putHandler(req, res);
+            break;
+        case 'DELETE':
+            await deleteHandler(req, res);
+            break;
         default:
-            write_error_400(res, 'Invalid Method');
+            httpHelper.writeErrorEnd(res, 400, messages.Errors.INVALID_HTTP_METHOD);
             break;
     }
 }
 
-function write_error_400(res: ServerResponse, error: string) {
-    res.statusCode = 400;
-    res.statusMessage = 'Invalid method';
-    let htmlText = '<h1>Error 400</h1> </br> <h3>' + error + '</h3>';
-    res.end(htmlText);
-}
+const PORT = process.env.PORT || 5000;
 
 let server = http.createServer();
-server.listen(3000, () => {
-    console.log('server.listen(3000)')
-}).on('request', http_handler);
+server.listen(PORT, () => {
+    console.log('server.listen(' + PORT + ")")
+}).on('request', httpHandler);
