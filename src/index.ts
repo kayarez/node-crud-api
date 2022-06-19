@@ -2,6 +2,9 @@ import * as http from "http"
 import * as dotenv from "dotenv"
 import * as url from 'url';
 import {IncomingMessage, ServerResponse} from "node:http";
+import cluster from 'cluster';
+import { cpus } from 'os';
+import * as process from 'process';
 
 import * as userContoller from "./controller/userController";
 import * as httpHelper from "./util/httpHelper";
@@ -117,6 +120,7 @@ catch(error)
 };
 
 let httpHandler = async (req: IncomingMessage, res: ServerResponse) => {
+  try{
     switch (req.method) {
         case 'GET':
             await getHandler(req, res);
@@ -134,11 +138,18 @@ let httpHandler = async (req: IncomingMessage, res: ServerResponse) => {
             httpHelper.writeErrorEnd(res, 400, messages.Errors.INVALID_HTTP_METHOD);
             break;
     }
+  }
+  catch(error)
+{
+  httpHelper.writeErrorEnd(res, 500, messages.Errors.INVALID_HTTP_METHOD);
+}
 }
 
 const PORT = process.env.PORT || 5000;
 
-let server = http.createServer();
-server.listen(PORT, () => {
+
+  let server = http.createServer();
+  server.listen(PORT, () => {
     console.log('server.listen(' + PORT + ")")
 }).on('request', httpHandler);
+
