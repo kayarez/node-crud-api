@@ -141,7 +141,13 @@ let httpHandler = async (req: IncomingMessage, res: ServerResponse) => {
   }
   catch(error)
 {
-  httpHelper.writeErrorEnd(res, 500, messages.Errors.INVALID_HTTP_METHOD);
+  res.writeHead(500, { "Content-Type": "application/json" });
+  res.end(
+    JSON.stringify({
+      success: false,
+      error: error,
+    })
+  );
 }
 }
 
